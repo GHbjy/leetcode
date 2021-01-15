@@ -1,3 +1,6 @@
+# reference:https://leetcode-cn.com/problems/binary-tree-inorder-traversal/solution/python3-er-cha-shu-suo-you-bian-li-mo-ban-ji-zhi-s/
+
+
 # Definition for a binary tree node.
 class TreeNode:
     def __init__(self, x):
@@ -12,38 +15,64 @@ class TreeNode:
 
 # 递归1：二叉树遍历最易理解和实现版本
 class Solution:
+    def preorderTraversal(self, root: TreeNode) -> []:
+        if not root:
+            return []
+        # 前序遍历
+        return [root.val] + self.preorderTraversal(root.left) + self.preorderTraversal(root.right)
+
     def inorderTraversal(self, root: TreeNode) -> []:
         if not root:
             return []
-        # 前序递归
-        # return [root.val] + self.preorderTraversal(root.left) + self.preorderTraversal(root.right)
         # 中序递归
         return self.inorderTraversal(root.left) + [root.val] + self.inorderTraversal(root.right)
-        # # 后序递归
-        # return self.postorderTraversal(root.left) + self.postorderTraversal(root.right) + [root.val]
+
+    def postorderTraversal(self, root: TreeNode) -> []:
+        if not root:
+            return []
+        # 后序遍历
+        return self.postorderTraversal(root.left) + self.postorderTraversal(root.right) + [root.val]
 
 
 # 递归2：通用模板，可以适应不同的题目，添加参数、增加返回条件、修改进入递归条件、自定义返回值
-class Solution2:
+class SolutionGeneralRecursion:
     def preorderTraversal(self, root: TreeNode) -> []:
-        def dfs(cur):
+        def pre_order_traversal(cur):
             if not cur:
-                return
-                # 前序递归
+                return []
+            # 前序递归
             res.append(cur.val)
-            dfs(cur.left)
-            dfs(cur.right)
-            # # 中序递归
-            # dfs(cur.left)
-            # res.append(cur.val)
-            # dfs(cur.right)
-            # # 后序递归
-            # dfs(cur.left)
-            # dfs(cur.right)
-            # res.append(cur.val)
+            pre_order_traversal(cur.left)
+            pre_order_traversal(cur.right)
 
         res = []
-        dfs(root)
+        pre_order_traversal(root)
+        return res
+
+    def inorderTraversal(self, root: TreeNode) -> []:
+        def in_order_traversal(cur):
+            if not cur:
+                return []
+            # 中序遍历
+            in_order_traversal(cur.left)
+            res.append(cur.val)
+            in_order_traversal(cur.right)
+
+        res = []
+        in_order_traversal(root)
+        return res
+
+    def postorderTraversal(self, root: TreeNode) -> []:
+        def post_order_traversal(cur):
+            if not cur:
+                return []
+            # 后序遍历
+            post_order_traversal(cur.left)
+            post_order_traversal(cur.right)
+            res.append(cur.val)
+
+        res = []
+        post_order_traversal(root)
         return res
 
 
@@ -52,13 +81,14 @@ class Solution2:
 # 空间复杂度：O(h)，h为树的高度。取决于树的结构，最坏情况存储整棵树，即O(n)
 
 # 迭代1：前序遍历最常用模板（后序同样可以用）
-class Solution3:
+class SolutionIteration:
     def preorderTraversal(self, root: TreeNode) -> []:
         if not root:
             return []
         res = []
-        stack = [root]
-        # # 前序迭代模板：最常用的二叉树DFS迭代遍历模板
+        stack = [root]  # stack save node info
+        # 前序迭代模板：最常用的二叉树DFS迭代遍历模板
+        # 根左右《-存放在栈中根右左（左先出栈）
         while stack:
             cur = stack.pop()
             res.append(cur.val)
@@ -68,41 +98,65 @@ class Solution3:
                 stack.append(cur.left)
         return res
 
-        # # 后序迭代，相同模板：将前序迭代进栈顺序稍作修改，最后得到的结果反转
-        # while stack:
-        #     cur = stack.pop()
-        #     if cur.left:
-        #         stack.append(cur.left)
-        #     if cur.right:
-        #         stack.append(cur.right)
-        #     res.append(cur.val)
-        # return res[::-1]
+    def postorderTraversal(self, root: TreeNode) -> []:
+        if not root:
+            return []
+        res = []
+        stack = [root]
+        # 后序迭代，相同模板：将前序迭代进栈顺序稍作修改，最后得到的结果反转
+        # 左右根《-翻转根右左《-根左右（右先出栈）
+        while stack:
+            cur = stack.pop()
+            if cur.left:
+                stack.append(cur.left)
+            if cur.right:
+                stack.append(cur.right)
+            res.append(cur.val)
+        return res[::-1]
 
 
 # 迭代1：层序遍历最常用模板
-class Solution4:
+class SolutionLevelOrder:
     def levelOrder(self, root: TreeNode) -> []:
         if not root:
             return []
         cur, res = [root], []
         while cur:
-            lay, layval = [], []
-            for node in cur:
-                layval.append(node.val)
-                if node.left: lay.append(node.left)
-                if node.right: lay.append(node.right)
-            cur = lay
-            res.append(layval)
+            layer, layer_val = [], []
+            for _node in cur:
+                layer_val.append(_node.val)
+                if _node.left:
+                    layer.append(_node.left)
+                if _node.right:
+                    layer.append(_node.right)
+            cur = layer
+            res.append(layer_val)
         return res
 
 
 # 迭代2：前、中、后序遍历通用模板（只需一个栈的空间）
-class Solution5:
+class SolutionGeneralIteration:
+    def preorderTraversal(self, root: TreeNode) -> []:
+        res = []
+        stack = []
+        cur = root
+        # pre order
+        # 根左右《-cur取右节点《-stack出栈赋值cur《-res入栈，stack入栈cur，cur取左节点
+        while stack or cur:
+            while cur:
+                res.append(cur.val)
+                stack.append(cur)
+                cur = cur.left
+            cur = stack.pop()
+            cur = cur.right
+        return res
+
     def inorderTraversal(self, root: TreeNode) -> []:
         res = []
         stack = []
         cur = root
         # 中序，模板：先用指针找到每颗子树的最左下角，然后进行进出栈操作
+        # 左根右《-cur取右节点《-res入栈《-stack出栈赋值cur《-stack入栈，cur取左节点
         while stack or cur:
             while cur:
                 stack.append(cur)
@@ -112,70 +166,93 @@ class Solution5:
             cur = cur.right
         return res
 
-        # # 前序，相同模板
-        # while stack or cur:
-        #     while cur:
-        #         res.append(cur.val)
-        #         stack.append(cur)
-        #         cur = cur.left
-        #     cur = stack.pop()
-        #     cur = cur.right
-        # return res
-
-        # # 后序，相同模板
-        # while stack or cur:
-        #     while cur:
-        #         res.append(cur.val)
-        #         stack.append(cur)
-        #         cur = cur.right
-        #     cur = stack.pop()
-        #     cur = cur.left
-        # return res[::-1]
+    def postorderTraversal(self, root: TreeNode) -> []:
+        res = []
+        stack = []
+        cur = root
+        # post order
+        # 左右根《-翻转根右左《-cur取左节点《-stack出栈赋值cur《-res入栈，stack入栈，cur取右节点
+        while stack or cur:
+            while cur:
+                res.append(cur.val)
+                stack.append(cur)
+                cur = cur.right
+            cur = stack.pop()
+            cur = cur.left
+        return res[::-1]
 
 
 # 迭代3：标记法迭代（需要双倍的空间来存储访问状态）：
 # 前、中、后、层序通用模板，只需改变进栈顺序或即可实现前后中序遍历，
 # 而层序遍历则使用队列先进先出。0表示当前未访问，1表示已访问。
-class Solution6:
+class SolutionSignIteration:
     def preorderTraversal(self, root: TreeNode) -> []:
         res = []
         stack = [(0, root)]
+        # 根左右《-右左根入栈（栈存储顺序翻转）
         while stack:
             flag, cur = stack.pop()
-            if not cur: continue
+            if not cur:
+                continue
             if flag == 0:
                 # 前序，标记法
                 stack.append((0, cur.right))
                 stack.append((0, cur.left))
                 stack.append((1, cur))
-
-                # # 后序，标记法
-                # stack.append((1, cur))
-                # stack.append((0, cur.right))
-                # stack.append((0, cur.left))
-
-                # # 中序，标记法
-                # stack.append((0, cur.right))
-                # stack.append((1, cur))
-                # stack.append((0, cur.left))
             else:
                 res.append(cur.val)
         return res
 
-        # # 层序，标记法
-        # res = []
-        # queue = [(0, root)]
-        # while queue:
-        #     flag, cur = queue.pop(0)  # 注意是队列，先进先出
-        #     if not cur: continue
-        #     if flag == 0:
-        # 层序遍历这三个的顺序无所谓，因为是队列，只弹出队首元素
-        #         queue.append((1, cur))
-        #         queue.append((0, cur.left))
-        #         queue.append((0, cur.right))
-        #     else:
-        #         res.append(cur.val)
-        # return res
+    def inorderTraversal(self, root: TreeNode) -> []:
+        res = []
+        stack = [(0, root)]
+        # 左根右《-右根左入栈
+        while stack:
+            flag, cur = stack.pop()
+            if not cur:
+                continue
+            if flag == 0:
+                # 中序，标记法
+                stack.append((0, cur.right))
+                stack.append((1, cur))
+                stack.append((0, cur.left))
+            else:
+                res.append(cur.val)
+        return res
+
+    def postorderTraversal(self, root: TreeNode) -> []:
+        res = []
+        stack = [(0, root)]
+        # 左右根《-根右左入栈
+        while stack:
+            flag, cur = stack.pop()
+            if not cur:
+                continue
+            if flag == 0:
+                # 后序，标记法
+                stack.append((1, cur))
+                stack.append((0, cur.right))
+                stack.append((0, cur.left))
+            else:
+                res.append(cur.val)
+        return res
+
+    def level_order(self, root: TreeNode) -> []:
+        # 层序，标记法
+        res = []
+        queue = [(0, root)]
+        while queue:
+            flag, cur = queue.pop(0)  # 注意是队列，先进先出
+            if not cur:
+                continue
+            if flag == 0:
+                # 层序遍历这三个的顺序无所谓，因为是队列，只弹出队首元素
+                queue.append((1, cur))
+                queue.append((0, cur.left))
+                queue.append((0, cur.right))
+            else:
+                res.append(cur.val)
+        return res
 
 
 # 莫里斯遍历
@@ -227,17 +304,15 @@ class Solution7:
 # 将根节点推出栈后，需要将这些节点都放入栈，共有 M−1个节点，因此栈的大小为 O(M)。
 
 
-"""
 # Definition for a Node.
 class Node:
     def __init__(self, val=None, children=None):
         self.val = val
         self.children = children
-"""
 
 
 # N叉树简洁递归
-class Solution8:
+class SolutionNTRecursion:
     def preorder(self, root: 'Node') -> []:
         if not root:
             return []
@@ -248,7 +323,7 @@ class Solution8:
 
 
 # N叉树通用递归模板
-class Solution9:
+class SolutionNTRecursionTemplate:
     def preorder(self, root: 'Node') -> []:
         res = []
 
@@ -264,7 +339,7 @@ class Solution9:
 
 
 # N叉树迭代方法
-class Solution10:
+class SolutionNTIteration:
     def preorder(self, root: 'Node') -> []:
         if not root:
             return []
@@ -281,10 +356,70 @@ class Solution10:
 
 
 if __name__ == '__main__':
-    solution = Solution()
+    # print('binary tree preorder in-order and post-order')
+    # solution = Solution()
+    # node = TreeNode(1)
+    # node.right = TreeNode(2)
+    # node.right.left = TreeNode(3)
+    # preorder_result = solution.preorderTraversal(node)
+    # print('preorder result:', preorder_result)
+    # in_order_result = solution.inorderTraversal(node)
+    # print('in-order result:', in_order_result)
+    # post_order_result = solution.postorderTraversal(node)
+    # print('post-order result:', post_order_result)
+
+    # print('binary tree general recursion template')
+    # solution = SolutionGeneralRecursion()
+    # node = TreeNode(1)
+    # node.right = TreeNode(2)
+    # node.right.left = TreeNode(3)
+    # pre_order_result = solution.preorderTraversal(node)
+    # print('preorder result:', pre_order_result)
+    # in_order_result = solution.inorderTraversal(node)
+    # print('inorder result:', in_order_result)
+    # post_order_result = solution.postorderTraversal(node)
+    # print('postorder result:', post_order_result)
+
+    # print('binary tree general iteration template')
+    # solution = SolutionIteration()
+    # node = TreeNode(1)
+    # node.right = TreeNode(2)
+    # node.right.left = TreeNode(3)
+    # pre_order_result = solution.preorderTraversal(node)
+    # print('preorder result:', pre_order_result)
+    # post_order_result = solution.postorderTraversal(node)
+    # print('postorder result:', post_order_result)
+
+    # print('binary tree level order')
+    # solution = SolutionLevelOrder()
+    # node = TreeNode(1)
+    # node.right = TreeNode(2)
+    # node.right.left = TreeNode(3)
+    # level_order_result = solution.levelOrder(node)
+    # print('level order result:', level_order_result)
+
+    # print('binary tree general iteration template')
+    # solution = SolutionGeneralIteration()
+    # node = TreeNode(1)
+    # node.right = TreeNode(2)
+    # node.right.left = TreeNode(3)
+    # pre_order_result = solution.preorderTraversal(node)
+    # print('preorder result:', pre_order_result)
+    # in_order_result = solution.inorderTraversal(node)
+    # print('inorder result:', in_order_result)
+    # post_order_result = solution.postorderTraversal(node)
+    # print('postorder result:', post_order_result)
+
+    print('binary tree general iteration with tuple stack')
+    solution = SolutionSignIteration()
     node = TreeNode(1)
     node.right = TreeNode(2)
     node.right.left = TreeNode(3)
-    result = solution.inorderTraversal(node)
-
-    print('inorder result:', result)
+    pre_order_result = solution.preorderTraversal(node)
+    print('preorder result:', pre_order_result)
+    in_order_result = solution.inorderTraversal(node)
+    print('inorder result:', in_order_result)
+    post_order_result = solution.postorderTraversal(node)
+    print('postorder result:', post_order_result)
+    level_order_result = solution.level_order(node)
+    print('level order result:', level_order_result)
